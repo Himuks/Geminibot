@@ -3,23 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Chatbot</title>
+    <title>Gemini AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <h2>Gemini NSP Chatbot</h2>
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h2>Gemini AI Assistant</h2>
+            <div class="header-actions">
+                <button id="clear-chat" title="Clear conversation">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
         </div>
         <div id="chat-box" class="chat-box">
             <!-- Chat messages will appear here -->
             <div class="message bot-message">
-                <p>Hello! Ask me something, or type a sentence and I'll try to predict the next one.</p>
+                <div class="avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>Hello! I'm your Gemini AI assistant. Ask me anything or start a conversation!</p>
+                </div>
             </div>
         </div>
+        <div class="typing-indicator hidden" id="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
         <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type your message here...">
-            <button id="send-button">Send</button>
+            <textarea id="user-input" placeholder="Type your message here..." rows="1"></textarea>
+            <button id="send-button" title="Send message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>

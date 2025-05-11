@@ -1,10 +1,10 @@
 import os # Added for environment variables
 from flask import Flask, render_template, request, jsonify
-import google.generativeai as genai # Added for Gemini
+import google.generativeai as genai # Added for Google Generative AI
 
 app = Flask(__name__)
 
-# --- Gemini API Integration ---
+# --- Google Generative AI API Integration ---
 # IMPORTANT: Store your API key securely. Using an environment variable is recommended.
 # Example: Set an environment variable named GOOGLE_API_KEY with your key.
 # In your terminal:
@@ -30,21 +30,21 @@ try:
 
     # Create the model
     # See https://ai.google.dev/gemini-api/docs/models/gemini for model names
-    model = genai.GenerativeModel(model_name='gemini-1.5-flash') # Or another suitable model like 'gemini-1.5-flash'
+    model = genai.GenerativeModel(model_name='gemini-1.5-flash') # Or another suitable model
 
 except Exception as e:
-    print(f"Error configuring Gemini API: {e}")
+    print(f"Error configuring Google Generative AI API: {e}")
     print("The application might not work correctly if the API is not configured.")
     model = None
-# --- End Gemini API Integration ---
+# --- End Google Generative AI API Integration ---
 
 
-def get_gemini_prediction(prompt_text):
+def get_ai_prediction(prompt_text):
     """
-    Function to get a prediction from the Gemini API.
+    Function to get a prediction from the Google Generative AI API.
     """
     if not model:
-        return "Error: Gemini model not initialized. Please check API key and configuration."
+        return "Error: AI model not initialized. Please check API key and configuration."
 
     try:
         # For next sentence prediction, you might want to frame the prompt accordingly.
@@ -57,7 +57,7 @@ def get_gemini_prediction(prompt_text):
         response = model.generate_content(full_prompt)
         
         # Debugging: print the full response object
-        # print(f"Gemini API Response: {response}")
+        # print(f"API Response: {response}")
 
         if response and response.parts:
             return response.text
@@ -67,7 +67,7 @@ def get_gemini_prediction(prompt_text):
             return "Sorry, I couldn't generate a response. The API returned an empty result."
 
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        print(f"Error calling Google Generative AI API: {e}")
         # You might want to inspect `e` for specific API errors.
         # For example, if e contains information about authentication failure.
         if "API_KEY_INVALID" in str(e) or "API_KEY_MISSING" in str(e) or "PERMISSION_DENIED" in str(e):
@@ -85,7 +85,7 @@ def predict():
         return jsonify({'error': 'No message provided'}), 400
 
     # In a real app, you'd send more context if needed, not just the last message.
-    bot_response = get_gemini_prediction(user_message)
+    bot_response = get_ai_prediction(user_message)
     return jsonify({'response': bot_response})
 
 if __name__ == '__main__':
