@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai # Added for Google Generative AI
 import json
 import random
+import re
 
 app = Flask(__name__)
 
@@ -93,6 +94,14 @@ sample_recipes = [
     }
 ]
 
+def clean_markdown_formatting(text):
+    """Remove markdown formatting like ** for bold and * for italic"""
+    # Replace markdown bold with plain text
+    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)
+    # Replace markdown italic with plain text
+    text = re.sub(r'\*(.*?)\*', r'\1', text)
+    return text
+
 def get_cooking_response(message, ingredients=None):
     """
     Generate a cooking-related response based on user message and ingredients.
@@ -117,7 +126,9 @@ def get_cooking_response(message, ingredients=None):
         
         # If we get a valid response from the model
         if response and response.parts:
-            return {"response": response.text}
+            # Clean any markdown formatting from the AI response
+            cleaned_response = clean_markdown_formatting(response.text)
+            return {"response": cleaned_response}
         elif response and response.prompt_feedback:
             return {"response": f"Blocked by API. Reason: {response.prompt_feedback}"}
         else:

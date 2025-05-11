@@ -17,6 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
         this.style.height = (this.scrollHeight) + 'px';
     });
 
+    function processAIResponse(text) {
+        // Replace Markdown bold formatting with HTML
+        return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                   .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+
     function addMessage(text, sender, isHtml = false) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', sender + '-message');
@@ -42,9 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isHtml) {
             contentDiv.innerHTML = text;
         } else {
-            const p = document.createElement('p');
-            p.textContent = text;
-            contentDiv.appendChild(p);
+            // Process any markdown in text if it's from the bot
+            if (sender === 'bot') {
+                const p = document.createElement('p');
+                p.innerHTML = processAIResponse(text);
+                contentDiv.appendChild(p);
+            } else {
+                const p = document.createElement('p');
+                p.textContent = text;
+                contentDiv.appendChild(p);
+            }
         }
         
         messageDiv.appendChild(contentDiv);
