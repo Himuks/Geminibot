@@ -1,0 +1,3 @@
+Flask>=2.0
+# For actual Gemini integration, you would add:
+# google-generativeai 
