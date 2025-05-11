@@ -1,6 +1,6 @@
 :root {
-    --primary-color: #6563ff;
-    --primary-light: #f0f0ff;
+    --primary-color: #ff6b35;
+    --primary-light: #fff0eb;
     --secondary-color: #f8f9fa;
     --text-primary: #333;
     --text-secondary: #666;
@@ -10,6 +10,8 @@
     --typing-dot-color: var(--primary-color);
     --shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+    --tag-bg: #e9f7ef;
+    --tag-color: #27ae60;
 }
 
 * {
@@ -23,6 +25,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f9fafc;
+    background-image: url('https://www.transparenttextures.com/patterns/cooking-icons.png');
     display: flex;
     justify-content: center;
     align-items: center;
@@ -133,6 +136,35 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+.message-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.recipe-card {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.recipe-card h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+.recipe-card ul {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.recipe-card ol {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
 .user-message {
     flex-direction: row-reverse;
 }
@@ -189,6 +221,34 @@ body {
     display: none;
 }
 
+.ingredient-tags {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px 15px;
+    gap: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ingredient-tag {
+    background-color: var(--tag-bg);
+    color: var(--tag-color);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.ingredient-tag button {
+    background: none;
+    border: none;
+    color: #999;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
 .chat-input {
     display: flex;
     padding: 15px;
@@ -227,7 +287,7 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 2px 8px rgba(101, 99, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
 }
 
 #send-button i {
@@ -236,7 +296,7 @@ body {
 
 #send-button:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(101, 99, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
 }
 
 #send-button:active {

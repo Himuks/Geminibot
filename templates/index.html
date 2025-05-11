@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini AI Assistant</title>
+    <title>Cooking Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -11,9 +11,9 @@
     <div class="chat-container">
         <div class="chat-header">
             <div class="logo">
-                <i class="fas fa-robot"></i>
+                <i class="fas fa-utensils"></i>
             </div>
-            <h2>Gemini AI Assistant</h2>
+            <h2>Cooking Assistant</h2>
             <div class="header-actions">
                 <button id="clear-chat" title="Clear conversation">
                     <i class="fas fa-trash"></i>
@@ -24,10 +24,10 @@
             <!-- Chat messages will appear here -->
             <div class="message bot-message">
                 <div class="avatar">
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-chef-hat"></i>
                 </div>
                 <div class="message-content">
-                    <p>Hello! I'm your Gemini AI assistant. Ask me anything or start a conversation!</p>
+                    <p>Hello! I'm your cooking assistant. Tell me what ingredients you have, and I'll suggest recipes and guide you through the cooking process. You can also ask for substitution ideas if you're missing something!</p>
                 </div>
             </div>
         </div>
@@ -36,8 +36,11 @@
             <span></span>
             <span></span>
         </div>
+        <div class="ingredient-tags" id="ingredient-tags">
+            <!-- Ingredient tags will appear here -->
+        </div>
         <div class="chat-input">
-            <textarea id="user-input" placeholder="Type your message here..." rows="1"></textarea>
+            <textarea id="user-input" placeholder="List ingredients you have or ask for recipe suggestions..." rows="1"></textarea>
             <button id="send-button" title="Send message">
                 <i class="fas fa-paper-plane"></i>
             </button>

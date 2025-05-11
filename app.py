@@ -1,6 +1,8 @@
 import os # Added for environment variables
 from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai # Added for Google Generative AI
+import json
+import random
 
 app = Flask(__name__)
 
@@ -38,41 +40,156 @@ except Exception as e:
     model = None
 # --- End Google Generative AI API Integration ---
 
+# Sample recipes database (in a real app, this would be a proper database)
+sample_recipes = [
+    {
+        "name": "Quick Pasta Primavera",
+        "ingredients": ["pasta", "olive oil", "garlic", "bell peppers", "zucchini", "cherry tomatoes", "parmesan cheese", "basil"],
+        "steps": [
+            "Cook pasta according to package directions.",
+            "Heat olive oil in a large skillet over medium heat.",
+            "Add minced garlic and sauté until fragrant, about 30 seconds.",
+            "Add sliced bell peppers and zucchini, cook for 3-4 minutes until slightly softened.",
+            "Add halved cherry tomatoes and cook for another 2 minutes.",
+            "Drain pasta and add to the skillet with vegetables.",
+            "Toss with grated parmesan cheese and torn basil leaves.",
+            "Season with salt and pepper to taste."
+        ],
+        "time": 20,
+        "difficulty": "Easy",
+        "tips": "You can use any vegetables you have on hand."
+    },
+    {
+        "name": "Simple Omelette",
+        "ingredients": ["eggs", "butter", "salt", "pepper", "cheese"],
+        "steps": [
+            "Whisk eggs in a bowl with a pinch of salt and pepper.",
+            "Melt butter in a non-stick pan over medium heat.",
+            "Pour in egg mixture and let it cook until edges begin to set.",
+            "Sprinkle cheese over half of the omelette.",
+            "Using a spatula, fold the omelette in half.",
+            "Cook for another minute, then slide onto a plate."
+        ],
+        "time": 10,
+        "difficulty": "Easy",
+        "tips": "Add any fillings you like - ham, mushrooms, spinach, etc."
+    },
+    {
+        "name": "Chicken Stir Fry",
+        "ingredients": ["chicken breast", "soy sauce", "garlic", "ginger", "bell peppers", "broccoli", "carrots", "vegetable oil", "rice"],
+        "steps": [
+            "Cut chicken into bite-sized pieces and marinate in soy sauce for 10 minutes.",
+            "Prepare rice according to package instructions.",
+            "Heat oil in a wok or large pan over high heat.",
+            "Add minced garlic and ginger, stir for 30 seconds.",
+            "Add chicken and cook until no longer pink, about 5-6 minutes.",
+            "Add chopped vegetables and stir-fry for 3-4 minutes until crisp-tender.",
+            "Add a splash more soy sauce if needed.",
+            "Serve hot over rice."
+        ],
+        "time": 25,
+        "difficulty": "Medium",
+        "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+    }
+]
 
-def get_ai_prediction(prompt_text):
+def get_cooking_response(message, ingredients=None):
     """
-    Function to get a prediction from the Google Generative AI API.
+    Generate a cooking-related response based on user message and ingredients.
+    In a production app, this would use the AI model to generate actual responses.
     """
     if not model:
-        return "Error: AI model not initialized. Please check API key and configuration."
+        return {"response": "Error: AI model not initialized. Please check API key and configuration."}
 
     try:
-        # For next sentence prediction, you might want to frame the prompt accordingly.
-        # This is a simple example; you might need a more sophisticated prompt.
-        # full_prompt = f"The user has typed the following conversation so far, predict the next sentence from the bot: \\nUser: {prompt_text}\\nBot:"
-        # Or simply:
-        full_prompt = f"Predict the next sentence or provide a relevant continuation for: \"{prompt_text}\""
-
-
-        response = model.generate_content(full_prompt)
+        # First, check if we should return a recipe based on ingredients
+        if ingredients and len(ingredients) >= 2:
+            # In a real app, you'd use the AI to find or generate a matching recipe
+            # For this demo, we'll use a simple matching algorithm with our sample recipes
+            recipe = find_matching_recipe(ingredients)
+            
+            if recipe:
+                return {"recipe": recipe}
         
-        # Debugging: print the full response object
-        # print(f"API Response: {response}")
-
+        # For general cooking inquiries
+        prompt = create_cooking_prompt(message, ingredients)
+        response = model.generate_content(prompt)
+        
+        # If we get a valid response from the model
         if response and response.parts:
-            return response.text
+            return {"response": response.text}
         elif response and response.prompt_feedback:
-             return f"Blocked by API. Reason: {response.prompt_feedback}"
+            return {"response": f"Blocked by API. Reason: {response.prompt_feedback}"}
         else:
-            return "Sorry, I couldn't generate a response. The API returned an empty result."
+            # Fallback responses if no AI response
+            fallbacks = [
+                "I'd recommend looking up recipes that use those ingredients, perhaps something like a simple stir-fry or pasta dish.",
+                "Those ingredients could work well in a salad or quick sauté.",
+                "Have you considered making a soup or stew with those ingredients?",
+                "You might try roasting some of those vegetables and serving with a simple protein."
+            ]
+            return {"response": random.choice(fallbacks)}
 
     except Exception as e:
         print(f"Error calling Google Generative AI API: {e}")
-        # You might want to inspect `e` for specific API errors.
-        # For example, if e contains information about authentication failure.
-        if "API_KEY_INVALID" in str(e) or "API_KEY_MISSING" in str(e) or "PERMISSION_DENIED" in str(e):
-            return "Sorry, there was an issue with the API key or permissions. Please check the server logs."
-        return f"Sorry, an error occurred while contacting the AI: {e}"
+        return {"response": f"Sorry, I couldn't generate a recipe suggestion right now: {e}"}
+
+def create_cooking_prompt(message, ingredients=None):
+    """Create a prompt for the cooking assistant."""
+    base_prompt = "You are a helpful cooking assistant that helps users create meals with the ingredients they have."
+    
+    if ingredients and len(ingredients) > 0:
+        ingredient_list = ", ".join(ingredients)
+        prompt = f"{base_prompt}\n\nThe user has the following ingredients: {ingredient_list}\n\nUser message: {message}\n\nProvide a helpful response about cooking with these ingredients. If they're asking for a recipe, suggest a dish that can be made with these ingredients or suggest substitutions for missing ingredients."
+    else:
+        prompt = f"{base_prompt}\n\nUser message: {message}\n\nProvide a helpful response about cooking."
+    
+    return prompt
+
+def find_matching_recipe(ingredients):
+    """
+    Find a recipe that matches the user's ingredients.
+    In a real app, this would be more sophisticated, using AI or a proper algorithm.
+    """
+    # Convert all ingredients to lowercase for case-insensitive matching
+    user_ingredients = [ing.lower() for ing in ingredients]
+    
+    best_match = None
+    highest_match_count = 1  # Require at least 2 matching ingredients
+    
+    for recipe in sample_recipes:
+        recipe_ingredients = [ing.lower() for ing in recipe["ingredients"]]
+        
+        # Count how many user ingredients are in this recipe
+        match_count = sum(1 for ing in user_ingredients if any(ing in r_ing for r_ing in recipe_ingredients))
+        
+        if match_count > highest_match_count:
+            highest_match_count = match_count
+            best_match = recipe
+    
+    return best_match
+
+def get_substitution_suggestion(ingredient):
+    """
+    Get substitution suggestions for a missing ingredient.
+    In a real app, this would use the AI model to generate proper substitutions.
+    """
+    substitutions = {
+        "butter": ["olive oil", "coconut oil", "margarine"],
+        "milk": ["almond milk", "soy milk", "oat milk", "coconut milk"],
+        "eggs": ["applesauce", "mashed banana", "flax seeds mixed with water"],
+        "flour": ["almond flour", "coconut flour", "oat flour", "gluten-free flour blend"],
+        "sugar": ["honey", "maple syrup", "agave nectar", "stevia"],
+        "soy sauce": ["tamari", "coconut aminos", "Worcestershire sauce"],
+        "rice": ["quinoa", "cauliflower rice", "bulgur", "couscous"],
+        "pasta": ["zucchini noodles", "spaghetti squash", "rice noodles", "bean pasta"]
+    }
+    
+    for key, options in substitutions.items():
+        if key in ingredient.lower():
+            return options
+    
+    return None
 
 @app.route('/')
 def index():
@@ -80,13 +197,15 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    user_message = request.json.get('message')
+    data = request.json
+    user_message = data.get('message', '')
+    ingredients = data.get('ingredients', [])
+    
     if not user_message:
         return jsonify({'error': 'No message provided'}), 400
 
-    # In a real app, you'd send more context if needed, not just the last message.
-    bot_response = get_ai_prediction(user_message)
-    return jsonify({'response': bot_response})
+    response = get_cooking_response(user_message, ingredients)
+    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True) 
